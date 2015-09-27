@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Maximum Pain calculator</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Maximum Pain calculator">
+  <meta name="author" content="Eusebio Rufian-Zilbermann">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="http://slidifylibraries2.googlecode.com/git/inst/libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="http://slidifylibraries2.googlecode.com/git/inst/libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="http://slidifylibraries2.googlecode.com/git/inst/libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="http://slidifylibraries2.googlecode.com/git/inst/libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="http://slidifylibraries2.googlecode.com/git/inst/libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="http://slidifylibraries2.googlecode.com/git/inst/libraries/frameworks/io2012/js/slides" 
+    src="http://slidifylibraries2.googlecode.com/git/inst/libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Maximum Pain calculator</h1>
+    <h2>Data application for fun and profit</h2>
+    <p>Eusebio Rufian-Zilbermann<br/>Investment Enthusiast</p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>What is Maximum Pain theory?</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>In the stock market, some option traders (typically larger ones) use techniques 
+for risk management known as <a href="https://en.wikipedia.org/wiki/Delta_neutral">delta neutral and delta hedging</a>. These operations create a relationship between stock prices and open positions on options. Maximum Pain is the value that maximizes option buyer&#39;s losses and the theory predicts that stock prices on expiration day will trend towards this value.</p>
+
+<h2>Calculating Buyers&#39; Gain</h2>
+
+<p>Open Interest is the amount of option contracts that have been purchased and sold for specific stock prices (the strike price) and expiration dates. Call contracts give the buyer the right to buy at the strike price. Call buyers make money based on the difference betweeen stock price and strike price when the stock price is above the strike, otherwise they don&#39;t make any money. Put contracts give a right to sell and contract buyers make the difference between strike and option price when the price is below the strike price, zero otherwise. For each strike price we can calculate the Call and Put buyers&#39; gains and aggregate them.</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="class" id="id" style="background:;">
+  <hgroup>
+    <h3>Example Gain calculation</h3>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">BuyerGains&lt;-function(Symbol, Expiration){  
+  oc&lt;-getOptionChain(Symbol, Exp=Expiration)  
+  CallValue&lt;-function(x){sum((oc$calls$Strike&lt;x)*(x-oc$calls$Strike)*oc$calls$OI)/10000} ## Million $
+  PutValue&lt;-function(x){sum((oc$puts$Strike&gt;x)*(oc$puts$Strike-x)*oc$puts$OI/10000)} 
+  AllStrikes&lt;-sort(unique(c(oc$calls$Strike,oc$puts$Strike)))
+  data.frame(puts=sapply(AllStrikes,PutValue),calls=sapply(AllStrikes,CallValue),row.names=AllStrikes)}
+buyerGains&lt;-BuyerGains(&quot;FB&quot;, as.Date(&quot;2015-10-9&quot;)) ##Date must be adjusted if run after Oct 9th 2015
+barplot(t(data.matrix(buyerGains)),col=c(&quot;red&quot;,&quot;green&quot;),main=&quot;Buyer Gains&quot;,ylab=&quot;Millions of US$&quot;,
+        xlab=&quot;Stock price at expiration in US$&quot;,legend.text=c(&quot;Put buyers&#39; gain&quot;,&quot;Call buyers&#39; gain&quot;))
+</code></pre>
+
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA/AAAAEgCAMAAAAkIGg6AAAArlBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZpAAZrYA/wA6AAA6ADo6AGY6OgA6OmY6OpA6ZrY6kJA6kLY6kNtmAABmADpmAGZmOgBmOjpmOpBmZjpmZmZmtrZmtttmtv+QOgCQOjqQOmaQZgCQZpCQkDqQtpCQ27aQ29uQ2/+2ZgC2Zjq2tma225C2/7a2/9u2///bkDrb25Db/7bb/9vb////AAD/tmb/25D//7b//9v///+Jv1ZaAAAACXBIWXMAAAsSAAALEgHS3X78AAATMElEQVR4nO2di3rbxplAITeqLHvjtqTsdbKlXLttiOxmxXUUXvD+L7aYGwCCM7gQAHH5z/kSS+LMDwyHOJgLCEyUAIAYorELAAC3A+EBBIHwAIJAeABBIDyAIBAeQBAIDyAIhAcQBMIDCALhAQSB8ACCQHgAQSA8gCAQHkAQCA8gCIQHEATCAwgC4QEEgfAAgkB4AEEgPIAgEB5AEAgPIAiEBxAEwgMIAuGXy3EdKe5fm2U/PaeZ77bF+Dcvw5QMRgPhl4sVvqHxh0eTezN0sWBMEH65mBZa/Xt6Tn87ru9/Vz/30SpJdkbt0/PdT6ZVT9v3B/1venrYm6beRv53FKntqBMCLf7sQfjl4oS/f3XCv+5Sy+PU5Vg35ivTjdc9gMOj+fH+xfYM7l+N8DrnQ/bi2G8KuoHwy8V26VO/M+EPjw/qd223+sW064q9+8XFvnmxwq/SNBWJ7EsA4ZeLG8PnXfq0qb//vn7QfXZ9Kki79HaWTgu/j0y3XUU64XXfXjX3EV36BYDwy8XOssfRJhM+2d3963HlE1634EZ4M33nhHeR+tXiJD7MEYRfLkXh07H7LjLaptJm/fNceDNdp/v5u7QXf3gsC5+YTY30XqAnEH655F16O0mnB+7aa/d3Lnx2Wc51+EvCu2Z/1HcEnUH45ZJP2ulf/2ttVNeTc7Hzv9BJj53R6S+rXbS57NLTo589CC+MHb1y0SC8LHSLDXJBeFHs+OqscBAeQBAIDyAIhAcQBMIDCALhAQSB8ACCQHgAQSA8gCAQHkAQCA8gCIQHEATCAwgC4QEEgfAAgkB4AEEgPIAgEB5AEAgPIAiEBxAEwgMIYljhoyKD7gkAGjCw8H/kIDzA6CA8gCAQHkAQCA8gCIQHEATCAwgC4QH6IRqZZoWszaHWBY/swuGtqwDhQQwjH+E9CX96NsuN7u9frygDwoMYliH88ePL2c92ZUB4EMMyhKeFB2jEMoRPjmvG8AD1LET4TmVAeBDDYoVvfh0A4UEOSxL+8N7To0d4gJxlCG+H8L5BPMID5CxD+NT4VHVaeIAaFiK8Uv7+/xAeoJrCEe7/vus+/Tu/up02orYdjTf1G9+tLl4qtcJ9juEPj76rcggPkFMU/q2leNTvlERxZnxn4cO775zr2liEBznUCH982ibmi2zq9pRNUfif7d/q/9T+w4fX41pNmh1+/PTmZa/nz3b6pJC+/MN/bgsb+PBV/VbefbNCdnmDoRwID2KoET77rqoy39juhL9/tX+k/+9XSfpfvEp2D6nYG/2d9vRXQ/ry/m5b2MDjKtsuwgPckjrhHwp5U43Pu/Txxgp//Pz6q1baZLEdgywqOX3Znm/ADeURHuCW1AifdtTdr7HqpefC/7otCH/68u/Pr/pi+N1Wp6f997ttvgktfHEDCA8wBk3H8Mf1ptSl36iXnby7n1fu3lTnsuu12xb+fAMIDzAGdZfl3Cy9tvTdtiD8g+7LpycElSVNMoN1k1PJng3/zRj+fAMIDzAGtUe4uw6/i6IfPm3OZulVpz19+a+qCf/Hi56Ov9sal+PCt1zTl/+cdunPNjBh4ds/gQtgNvR0SB/+Up3s+w5c893fVngafFgu/RzSu7ttMO30HEXBZIQHuCWL+S799bEID3JAeIQHQSA8woMgau+Wu9nuO+e6NhbhQQ5F4T2HuVnRJbvprddbY0u7b1bI1iA8QE6d8MrR/Jvxvd4aW9p951zXxiI8yKGJ8NlXaH9bm6/T9HNrbGn3zQrZ5Q2GciA8iKGJ8OYbscV74Xu5Nba0+7pCqm/v7isu6de/wVAOhAcxNBrDZ615r7fGlnZfU0j1EA616barSSE8QE6TFt7+7PvW2NLuawq5y64htFtPCuEBcmouy/mF7+fW2NLuawqpzhtqIpAWHuB6ag5pJ6e9DbbXW2Mb7L6YK+04pFuNGcMDXE9D4e1tsKdnN0vfw62xDXbfKte1sQgPcujhkL721tjmu6/PZSYXfcN7hAfI6X5IX31rbPPd61zHtbrs55+yU1P4Cs8AH+EBcuZz80y80l7vHjwZ7Jxh9rPVHhAe5DAb4ZXL+jL/pdO08AANmZXwu9Rn/5SAXS+aMTxAJbMRPok3p+eVviTY8x4QHuQwH+HTRvz+Vc3cNdxy45v7ER7kMB/hKzk8RquYLj1ADdHINCtkXQY1aRerL/19YNIOYO7oSTszLRd5u/RqRm+/4rIcwBIoeKcn7i5wl+Vo4QHmT9E7j9OJav+V8bsBxvBXjEAAoAtFz7xfvGkYG8hRLfwf538DwMDUt/DNYgM5EB5gStSO4ZvFhnIgPMCUqJ2lr4mtyYHwAFNizAdgIDzAjUF4AEEgPIAg3O2x18bW5EB4gI70+nUVI/xvVymP8ADDE73N6UV49TBcTbt1KBAe4Ab0L/yVnXqEBxieAYQfKhbhAboyhPDqoddRy5WmEB7gBgwgvPlW7e7Ga8shPEA9g43huVsOYHrQwgMIgjE8gCCYpQcQBMIDCALhAQSB8ACCQHgAQQwh/O7+dRdFm6tiq3IgPEBHhvjizdM2/c+/XPThMXQnHcIDDM8w37RL23iv8G7lmf3lVXqEBxieQbr00d127+3Su+/bDrC2HMID1HPbSbvbtfCsPAXg4caz9Pap9cOP4WnwATwMIfx+Ao+4QngAD0NM2q3bXJFr3u1GeICu3PiZdofH6G57i0k7hAfwMESXPg6uI6km7dTt8ggPMAqDdOmDY3gjevyA8ACjMMplud2fLr+Vg/AAw3Pzy3K6u7+7bP4HFp7L8gDJch9xdSE8DT7Ach9iifAAHpb6mOoa4enhg0yEtvA0+CAToWP4qgafEwAsl6U+4grhAZLLQxvhuZkeFkxR8LdDCH/8+Fv4m3Y1sTU5biY8DT4shcGFHy72hsKXggHmCsIjPAhi+C792vaE59ylL/1JDx/mCi38FcKXtgUwGxC+u/A0+DAb6NL3IPz5nwDThRYe4UEQCN+78MzpwXThizf9C19KBpgOtPBDC0+DDxMC4QcXvpQbYEQQ/sbC0+DDTSkdcIMLr2+GlzyGR3gYk5Lhw7fwuygKLkRRF1udY57Cl4IBBuXmwifa+dbSSxGeBh8GZQzhFbG3S394DHX3xQh//idAv4whfJw67V1B1q48k+wvn3gnVHiG+NAvY4zhg8tFu2dX335tOYSHhVI9LT/uLD0tfE0wQFuqDR/5Onx4ZVmE5yIeXMOkhe8SK0L4Um6AOmYmfPPmTKDwNPhQy8yEbx4rUfhSMMAFCL9c4Wnw4eIomLLwFc+/QniEh0ZEYYWnJrxdWfa6WIS/COYEIJE5CZ8cn7bXxiI8wkMyM+E7xCJ8TTDIAOER/g8u4skB4RHemxuWQflEjvAI7w2mwV8GNc4iPML/gfALAuER/qpg/J8nCI/wVwUj/DxBeITvIxj/p0ppMIbwCN9HMMJPlXbOIjzCtw0u+88J4LZUN+kIj/A9ByP8uHRyFuERvm2wZ1v4PySl2kV4b44OBz/Ct62Ct30eGOIpnz/7dBbhEb5tcG0LT4PfjSGdRXiEbxtcv623fR4nArjhlTWER/i2wfXbKndJafBLjDfRjvAI3za4/bYq/Jd5AhjPWYRH+LbBnbf1ts/DaB5MZqId4RG+bXDnbQmY4rsY1UzFWYRH+LbBfRdkEf5Xj8qn4yzCI3zb4IELUj7mJup/teGTdRbhp3W0zyF44IJUd4ZvSLkg4XLNyFmEn9bRPofgGxekQrva8UC34Ilqh/DeHB2OuQkd7VMMHrcgk1BlMgVB+CxHh2Nuukf7JILHLUipVR5Hlfk6i/CzOtonETyZglyO+Fv0yhEe4ZvkntTRPk7wZArS9wRAc1Xm6+ykhT886k/icvFYhB8zeDIF6Tu46vRQe/KYibNTFv70vNE/9/evrWMRHuFvWwU1Y4tWXY1OwfMV/vjx5exnUniv9VvvUGedgttsa6bBkykIVXDb4G50aeEBYGbUnzGOa31m8YzhAWBmdO4iAMB8QHgAQSA8gCAQHkAQCA8gCIQHEATCAwgC4QEEgfAAgkB4AEEgPIAgEB5AEAgPIAiEBxAEwgMIAuEBBDGs8Kfn6G6rn6HheV7OTj9YY+NJdSk23L5S+QgOF3J49OWrTk3c6/5y5lGH955gm6qe9bkJb3rvL3+2afdgIW9y4N3b1LyWfMnurYeLXVUjgeTq+pJYYZWpuhqyyvJWSiB37XHfmmGFjzfq0Vjqs9k9eDOEU9UjtUy43VA9ad7j0zbZ+R/GpVLXG2+qjQqUJNvm3lf3NlX9OLy7PIxssvoQqzadfrKed+iS/e++kOp7/lihKjzJhWJX1EigwuzLoc81i/JXmEkNVphJDlVYViB/hdnkQIXlqd4Ky9+sr8LyYodrxF9fuhqyyvJWSih3o+O+FYMKbx98qX74T2uq+vypLsVw+uI7I3tCDh9ei4/b9KU+XW7KRgXK6bYZ3/3L8yZs6l59lp6Pp1Cgik0nhx8/eT5amxx494VSVyQnSdVbDtVXMfky2r4c+lxdVEWFPW0rK8zsMlRhKrWiwp62VRVmil2RnFRU2NM2UGHF1HKwqQZXWf5KCeRudNy3Y1DhDx++qs5TyLNEn8T8qSblq+176efq1Z3sVEi4hQ/vKm+G/cn5Nn1Hd2GPFZt2JQiknr784uuhZu2s991npf7q7aEWeg++VrhRC18tfOX5U79edTpIKsVK/OV2qYEKc0r7Kywrtr/C8j37Ksxt2l9h1TWiqqG6UgK5Gx337RhW+MeNKrrqIHmF1y96U81Z3ISrDb3b1rby9uQcGFbqVN3j8sqho0LlrB59Zamn55Vvxzb58BjecbJb+YekJjn07m1qVkuBPfvPtTY1WF/69UCF2ZfD9eWivGfILNVbYVmyt8JcaqDCbHKgwlxqoMKyPfuPVZvqrzCbGqgvVQ15ZTUR3uZucty3ZOAWvrIlMEMlb6ovpWY8Y0LSGtr7xkh7a130N0/92ajQ+TnbprfBcqnHtc/3QoHCm0537D1+i+/m8t1XlzoP9j5g3AUH6su9Hqow/XLwc82iQpN2OtVfYYVdet+V23Nw0s6V1zdcaFZs/xPZbXCowkysv76ubuFDb6QDw47hP1eO9ZJYfeLeVJPyuY3wOiTYmYjdweUbwdmoQDmrz80uVbUbHooFunwDNtVMDF8e/o2CS7V0GRz7vLKpofoqvB4Y8obnPFxyEj62daS/woq7DMy9fXwJVVij4FCFZcHeCrOpwQPsbMaqxKEwhm8mfLFqZyS8Kqs+Ga+8wyLTWfGl2m5M7PpeqppP/6isJxMSOgGbVD0A843PTFSgnI1a+NDha5MDx0m+6aoWPvDuXXDs76G6ZH+XsFkLH6gw+3Loc82jgpMeD0HfbXKgwvJN+7v0ebCnwlxwoMJcsr/CXLH9FWZTA/WlqiGvrCbC29wNjvu2DCt8OuCpuF7rmpDL1DzljTnTpad076XTi5C9P2Oe6u2u2ahAObNtej8qkxq6euuCA28g27S/h9oo2FZyMNnfHtnUQH0VkgM1UjUBkEWFKixNraowewU68J7djEmgwuqDKypMJwcrzFxqrNq0v746XYevOe7bwjftAASB8ACCQHgAQSA8gCAQHkAQCA8gCIQHEATCAwgC4QEEgfAAgkB4AEEgPIAgEB5AEAgPIAiEBxAEwgMIAuEBBIHwAIJAeABBIDyAIBB+dqjlSN5cPiDa97DV8PMSgynnCelf3kf1Fl/LH75sS6Ye5djzeinQFwg/N9TqJm65xSLtViipe3Rqi2yZ8FnJ3v3y7XtgATcYGYSfG+Ypxk//Vs9azh8DfqdWUDw968csf/ynXtHvx09v/sc0u2aFJPtoZr1Ms/vT/IzVQ9BdWNqmp5EvWTa7DdWn+PDVttwqU/GPJO8L6JWGfv/mXcAXxgfh54ax2niWmmoX3N7f//5la5ZMOa7vX+3SGGoBUp34GrtlEPQqOVlH3bx8/PjbxxcX9l5H5tny/RweV27JLpWp8If515XsuP47wk8VhJ8fZi0E1YdO+82qRdXGnb78h1kiSfWs0+ZeL1HmzD5ffVstBH328i5aFcJcP95kO9/PWXNeXDpJ/+tWaYhD60DB2CD8LDm8c2aezOqIquX/6+d81ep444TXiXrdYbuGSaxm1qzw9mW1gFIeZtJctsJ+aoU3JUvL8u37mlm7SYLwc2Ove+bazFILv92ZLr1eP73Uwuet+3pz+XL880MhzEy4b/IufXULbxfa/PDqSrZ/OH17Da7ICKOC8HNDz4Vb/fIx/OH9/37Z2iUz13oVQmukSXyJiyNu0z9QG7OD8w+/f9nmYc7lvBths/mFT+IHsySoK9nx6Zdv3wPLs8LIIPzsUP3wtBt+er6YpXcz+D/ZMb67OG5m6W2PfhdFP3zaqOjERep5ve9ZmN5Klq0wSx8QXvX+9ZjdlsxcCBitfqAKhF8cobXPhwnzcmKWfqog/OKYgPAwWRAeQBAIDyAIhAcQBMIDCALhAQSB8ACCQHgAQSA8gCAQHkAQCA8gCIQHEATCAwgC4QEEgfAAgkB4AEEgPIAg/h9F7cEdH7gzCAAAAABJRU5ErkJggg==" alt="plot of chunk unnamed-chunk-2"> </p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="class" id="id" style="background:;">
+  <hgroup>
+    <h2>Example Maximum Pain calculation</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Maximum pain will occur at the strike price where the aggregate Call and Put buyers&#39; gain is minimized</p>
+
+<pre><code class="r">StrikePrices&lt;-row.names(buyerGains)
+MaxPain&lt;-StrikePrices[which.min(buyerGains[,&quot;calls&quot;]+buyerGains[,&quot;puts&quot;])]
+MaxPain
+</code></pre>
+
+<pre><code>## [1] &quot;92&quot;
+</code></pre>
+
+<h2>Why Maximum Pain?</h2>
+
+<p>When speculating on stock prices it is very important to get a trading edge edge: a way of assisting the decision making process so that the expected total gains are greater than the expected total losses.  </p>
+
+<p>Maximum pain is a tool that can help <strong>YOU</strong> in getting that trading edge and make more money.  </p>
+
+<hr>
+
+<p>Additional info: <a href="http://www.maximum-pain.com">www.maximum-pain.com</a></p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='What is Maximum Pain theory?'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='Example Gain calculation'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Example Maximum Pain calculation'>
+         3
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="http://slidifylibraries2.googlecode.com/git/inst/libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
