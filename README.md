@@ -20,39 +20,50 @@ for risk management known as [delta neutral and delta hedging](https://en.wikipe
 Open Interest is the amount of option contracts that have been purchased and sold for specific stock prices (the strike price) and expiration dates. Call contracts give the buyer the right to buy at the strike price. Call buyers make money based on the difference betweeen stock price and strike price when the stock price is above the strike, otherwise they don't make any money. Put contracts give a right to sell and contract buyers make the difference between strike and option price when the price is below the strike price, zero otherwise. For each strike price we can calculate the Call and Put buyers' gains and aggregate them.
 
 --- .class #id 
-### Example Gain calculation
+## Example Gain calculation
 
 
 
 ```r
 BuyerGains<-function(Symbol, Expiration){  
   oc<-getOptionChain(Symbol, Exp=Expiration)  
-  CallValue<-function(x){sum((oc$calls$Strike<x)*(x-oc$calls$Strike)*oc$calls$OI)/10000} ## Million $
-  PutValue<-function(x){sum((oc$puts$Strike>x)*(oc$puts$Strike-x)*oc$puts$OI/10000)} 
+  CallValue<-function(x){
+    sum((oc$calls$Strike<x)*(x-oc$calls$Strike)*oc$calls$OI)/10000} ## Million $
+  PutValue<-function(x){
+    sum((oc$puts$Strike>x)*(oc$puts$Strike-x)*oc$puts$OI/10000)} 
   AllStrikes<-sort(unique(c(oc$calls$Strike,oc$puts$Strike)))
-  data.frame(puts=sapply(AllStrikes,PutValue),calls=sapply(AllStrikes,CallValue),row.names=AllStrikes)}
-buyerGains<-BuyerGains("FB", as.Date("2015-10-9")) ##Date must be adjusted if run after Oct 9th 2015
-barplot(t(data.matrix(buyerGains)),col=c("red","green"),main="Buyer Gains",ylab="Millions of US$",
-        xlab="Stock price at expiration in US$",legend.text=c("Put buyers' gain","Call buyers' gain"))
+  data.frame(puts=sapply(AllStrikes,PutValue),
+             calls=sapply(AllStrikes,CallValue),
+             row.names=AllStrikes)}
+buyerGains<-BuyerGains("FB", as.Date("2015-10-9")) 
+                            ##Date must be adjusted if run after Oct 9th 2015
+StrikePrices<-row.names(buyerGains)
+MaxPain<-StrikePrices[which.min(buyerGains[,"calls"]+buyerGains[,"puts"])]
 ```
-
-![plot of chunk unnamed-chunk-2](assets/fig/unnamed-chunk-2-1.png) 
+Maximum pain will occur at the strike price where the aggregate Call and Put buyers' gain is minimized
 
 --- .class #id 
 ## Example Maximum Pain calculation
-Maximum pain will occur at the strike price where the aggregate Call and Put buyers' gain is minimized
 
 ```r
-StrikePrices<-row.names(buyerGains)
-MaxPain<-StrikePrices[which.min(buyerGains[,"calls"]+buyerGains[,"puts"])]
 MaxPain
 ```
 
 ```
 ## [1] "92"
 ```
+
+```r
+barplot(t(data.matrix(buyerGains)),col=c("red","green"),main="Buyer Gains",
+        ylab="Millions of US$",xlab="Stock price at expiration in US$",
+        legend.text=c("Put buyers' gain","Call buyers' gain"))
+```
+
+![plot of chunk unnamed-chunk-3](assets/fig/unnamed-chunk-3-1.png) 
+
+--- .class #id 
 ## Why Maximum Pain?
-When speculating on stock prices it is very important to get a trading edge edge: a way of assisting the decision making process so that the expected total gains are greater than the expected total losses.  
+When speculating on stock prices it is very important to get a trading edge: a way of assisting the decision making process so that the expected total gains are greater than the expected total losses.  
 
 Maximum pain is a tool that can help **YOU** in getting that trading edge and make more money.  
   
